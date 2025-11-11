@@ -198,7 +198,7 @@ def get_params(yaml_file=None):
         if params['instrument'] == 'NIRPS_HE':
             params['key_mjd'] = 'MJD-OBS'
             params['key_obj'] = 'DRSOBJN'
-            params['template_string'] = '/home/eartigau/scratch/nirps_tempo/red/other/Template_{}_sc1d_v_file_A.fits'
+            params['template_string'] = '/home/eartigau/scratch/nirps_tempo/red/other/Template_s1dv_{}_sc1d_v_file_A.fits'
             params['residual_path'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/'
             #params['search_t_slinky_path'] = '/Volumes/courlan/lbl_NIRPS_HE/science/*/*t.fits'
             params['pix_scale'] = 0.95  # km/s/pixel
