@@ -133,7 +133,7 @@ def get_params(yaml_file=None):
     """
 
     if getpass.getuser() == 'eartigau':
-        yaml_path = '/Users/eartigau/pycodes/pixeldecorr/yamls/'
+        yaml_path = '/Users/eartigau/slinky/yamls/'
     if getpass.getuser() == 'spirou':
         yaml_path = '/space/spirou/LBL-PCA/yamls/'
 
@@ -198,11 +198,11 @@ def get_params(yaml_file=None):
         if params['instrument'] == 'NIRPS_HE':
             params['key_mjd'] = 'MJD-OBS'
             params['key_obj'] = 'DRSOBJN'
-            params['template_string'] = '/Volumes/courlan/lbl_NIRPS_HE/templates/Template_{}_sc1d_v_file_A.fits'
-            params['residual_path'] = '/Volumes/courlan/decorr/residuals/'
+            params['template_string'] = '/home/eartigau/scratch/nirps_tempo/red/other/Template_{}_sc1d_v_file_A.fits'
+            params['residual_path'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/'
             #params['search_t_slinky_path'] = '/Volumes/courlan/lbl_NIRPS_HE/science/*/*t.fits'
             params['pix_scale'] = 0.95  # km/s/pixel
-            params['pca_mef_dir'] = '/Volumes/courlan/decorr/pca_mef/'
+            params['pca_mef_dir'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/pca_mef/'
 
     if getpass.getuser() == 'spirou':
         if params['instrument'] == 'SPIRou':
@@ -270,23 +270,42 @@ def get_params(yaml_file=None):
     params['whoami'] = getpass.getuser()
 
 
-    if 'NIRPS_HE' in params['instrument'].upper():
-        params['path_to_red'] = '/cosmos99/nirps/apero-data/nirps_he_online/objects/*/*t.fits'
-        params['WAVEFILE_KEY'] = 'WAVEFILE'
-        params['ext_wavefile'] = 1
-        params['fiber'] = 'A'
-    elif 'NIRPS_HA' in params['instrument'].upper():
-        params['path_to_red'] = '/cosmos99/nirps/apero-data/nirps_ha_online/objects/*/*t.fits'
-        params['WAVEFILE_KEY'] = 'WAVEFILE'
-        params['ext_wavefile'] = 1
-        params['fiber'] = 'A'
-    elif 'SPIROU' in params['instrument'].upper():
-        params['path_to_red'] = '/cosmos99/spirou/apero-data/spirou_offline/objects/*/*t.fits'
-        params['WAVEFILE_KEY'] = 'WAVEFILE'
-        params['ext_wavefile'] = 1
-        params['fiber'] = 'AB'
+    if getpass.getuser() == 'eartigau':
+        if 'NIRPS_HE' in params['instrument'].upper():
+            params['path_to_red'] = '/home/eartigau/scratch/nirps_tempo/objects/*/*t.fits'
+            params['WAVEFILE_KEY'] = 'WAVEFILE'
+            params['ext_wavefile'] = 1
+            params['fiber'] = 'A'
+        elif 'NIRPS_HA' in params['instrument'].upper():
+            params['path_to_red'] = '/home/eartigau/scratch/nirps_tempo/objects/*/*t.fits'
+            params['WAVEFILE_KEY'] = 'WAVEFILE'
+            params['ext_wavefile'] = 1
+            params['fiber'] = 'A'
+        elif 'SPIROU' in params['instrument'].upper():
+            params['path_to_red'] = '/home/eartigau/scratch/spirou/objects/*/*t.fits'
+            params['WAVEFILE_KEY'] = 'WAVEFILE'
+            params['ext_wavefile'] = 1
+            params['fiber'] = 'AB'
+        else:
+            raise ValueError(f'Instrument {params["instrument"]} not recognized')
     else:
-        raise ValueError(f'Instrument {params["instrument"]} not recognized')
+        if 'NIRPS_HE' in params['instrument'].upper():
+            params['path_to_red'] = '/cosmos99/nirps/apero-data/nirps_he_online/objects/*/*t.fits'
+            params['WAVEFILE_KEY'] = 'WAVEFILE'
+            params['ext_wavefile'] = 1
+            params['fiber'] = 'A'
+        elif 'NIRPS_HA' in params['instrument'].upper():
+            params['path_to_red'] = '/cosmos99/nirps/apero-data/nirps_ha_online/objects/*/*t.fits'
+            params['WAVEFILE_KEY'] = 'WAVEFILE'
+            params['ext_wavefile'] = 1
+            params['fiber'] = 'A'
+        elif 'SPIROU' in params['instrument'].upper():
+            params['path_to_red'] = '/cosmos99/spirou/apero-data/spirou_offline/objects/*/*t.fits'
+            params['WAVEFILE_KEY'] = 'WAVEFILE'
+            params['ext_wavefile'] = 1
+            params['fiber'] = 'AB'
+        else:
+            raise ValueError(f'Instrument {params["instrument"]} not recognized')
 
 
     if 'doplot' not in params.keys():
@@ -296,27 +315,42 @@ def get_params(yaml_file=None):
 
 
 
+    if getpass.getuser() == 'eartigau':
+        if params['instrument'].upper() == 'SPIROU':
+            params['INSTRUMENT'] = 'SPIROU'
+            params['DATA_DIR'] = '/Users/eartigau/scratch/LBL-PCA/SPIROU'
+            inst_folder = 'spirou'
+            rsync_machine = 'spirou-client@maestria'
+            inst_short = 'spirou'
+        elif 'NIRPS_HE' in params['instrument'].upper():
+            params['INSTRUMENT'] = 'NIRPS_HE'
+            params['DATA_DIR'] = '/Users/eartigau/scratch/LBL-PCA/NIRPS_HE'
+            inst_folder = 'nirps_he'
+            rsync_machine = 'nirps-client@maestria'
+            inst_short = 'nirps'
+        else:
+            raise ValueError(f'Instrument {params["instrument"]} not recognized')
+    else:
+        if params['instrument'].upper() == 'SPIROU':
+            params['INSTRUMENT'] = 'SPIROU'
+            params['DATA_DIR'] = '/space/spirou/LBL-PCA/SPIROU'
+            inst_folder = 'spirou'
+            rsync_machine = 'spirou-client@maestria'
+            inst_short = 'spirou'
 
-    if params['instrument'].upper() == 'SPIROU':
-        params['INSTRUMENT'] = 'SPIROU'
-        params['DATA_DIR'] = '/space/spirou/LBL-PCA/SPIROU'
-        inst_folder = 'spirou'
-        rsync_machine = 'spirou-client@maestria'
-        inst_short = 'spirou'
-
-    if 'NIRPS' in params['instrument'].upper():
-        params['INSTRUMENT'] = 'NIRPS_HE'
-        params['DATA_DIR'] = '/space/spirou/LBL-PCA/NIRPS_HE'
-        inst_folder = 'nirps_he'
-        rsync_machine = 'nirps-client@maestria'
-        inst_short = 'nirps'
+        if 'NIRPS' in params['instrument'].upper():
+            params['INSTRUMENT'] = 'NIRPS_HE'
+            params['DATA_DIR'] = '/space/spirou/LBL-PCA/NIRPS_HE'
+            inst_folder = 'nirps_he'
+            rsync_machine = 'nirps-client@maestria'
+            inst_short = 'nirps'
 
 
     if params['whoami'] == 'eartigau':
-        params['path0'] = '/Users/eartigau/glitch_fp/'+params['instrument']
+        params['path0'] = '/Users/eartigau/scratch/nirps_tempo/glitch_fp/'+params['instrument']
         if not os.path.exists(params['path0']):
             os.system('mkdir -p '+params['path0'])
-        params['output_slinky'] = os.path.join('/Users/eartigau/glitch_fp/', params['instrument'], 'data_'+params['instrument']+'_output/')
+        params['output_slinky'] = os.path.join('/Users/eartigau/scratch/nirps_tempo/glitch_fp/', params['instrument'], 'data_'+params['instrument']+'_output/')
         if not os.path.exists(params['output_slinky']):
             os.system('mkdir -p '+params['output_slinky'])
 
@@ -335,7 +369,10 @@ def get_params(yaml_file=None):
     now = datetime.datetime.now()
     now_str = (now.isoformat().replace('-','').replace(':','').replace('T','_')).split('.')[0]
 
-    path_to_summary = '/space/spirou/LBL-PCA/wraps/batch_summary/'+params['INSTRUMENT']
+    if getpass.getuser() == 'eartigau':
+        path_to_summary = '/home/eartigau/scratch/LBL-PCA/wraps/batch_summary/'+params['INSTRUMENT']
+    if getpass.getuser() == 'spirou':
+        path_to_summary = '/space/spirou/LBL-PCA/wraps/batch_summary/'+params['INSTRUMENT']
     path_to_summary = path_to_summary+'/'+now_str
     os.system('mkdir '+path_to_summary)
 
