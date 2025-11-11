@@ -14,7 +14,7 @@ from sklearn.cluster import Birch
 # give the same results every time
 from wpca import EMPCA
 
-from obsolete.astromdatabase import fetch_astrom
+from astromdatabase import fetch_astrom
 from pixtools import doppler, lowpassfilter, sigma, save_pickle, \
     read_pickle, printc, snail, dict2mef, mef2dict, load_yaml, read_t, write_t
 
@@ -225,18 +225,18 @@ def get_params(yaml_file=None):
             params['key_obj'] = 'DRSOBJN'
 
             params['template_string'] = \
-                '/cosmos99/nirps/apero-data/nirps_he_online/red/other/Template_{}_tellu_obj_A.fits'
-            params['residual_path'] = '/space/spirou/LBL-PCA/residuals_nirps/'
+                '/home/eartigau/scratch/nirps_tempo/red/other/Template_{}_tellu_obj_A.fits'
+            params['residual_path'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/'
             #
             params['pix_scale'] = 0.95  # km/s/pixel
-            params['pca_mef_dir'] = '/space/spirou/LBL-PCA/residuals_nirps/pca_mef/'
-            params['patched_wavesol'] = '/space/spirou/SLINKY/calib_NIRPS_HE_updatedwavesol/'
-            params['calib_dir'] = '/space/spirou/SLINKY/calib_NIRPS_HE/'
+            params['pca_mef_dir'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/pca_mef/'
+            params['patched_wavesol'] = '/home/eartigau/scratch/SLINKY/calib_NIRPS_HE_updatedwavesol/'
+            params['calib_dir'] = '/home/eartigau/scratch/SLINKY/calib_NIRPS_HE/'
             params['fibresetup'] = 'A'
             params['sample_order'] = 65
 
 
-            params['waveref_file_name'] = glob.glob('/cosmos99/nirps/apero-data/nirps_he_online/calib/*_pp_e2dsff_A_wavesol_ref_A.fits')[0]
+            params['waveref_file_name'] = glob.glob('/home/eartigau/scratch/nirps_he_online/calib/*_pp_e2dsff_A_wavesol_ref_A.fits')[0]
 
 
 

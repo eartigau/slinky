@@ -13,4 +13,4 @@ npca-max: 5
 
 # List of stars to be processed
 object_of_interest:
-  - 'GJ3618'
+  - 'PROXIMA'
