@@ -133,7 +133,7 @@ def get_params(yaml_file=None):
     """
 
     if getpass.getuser() == 'eartigau':
-        yaml_path = '/Users/eartigau/slinky/yamls/'
+        yaml_path = '/home/eartigau/slinky/yamls/'
     if getpass.getuser() == 'spirou':
         yaml_path = '/space/spirou/LBL-PCA/yamls/'
 
@@ -193,7 +193,7 @@ def get_params(yaml_file=None):
             #params['search_t_slinky_path'] = '/Volumes/courlan/SLINKY/data_SPIROU_output/*_slinky/*t_slinky.fits'
             params['pix_scale'] = 2.2  # km/s/pixel
             params['pca_mef_dir'] = '/Volumes/courlan/decorr/pca_mef/'
-            params['yaml_folder'] = '/Users/eartigau/pycodes/pixeldecorr/yamls/'
+            #params['yaml_folder'] = '/home/eartigau/pycodes/pixeldecorr/yamls/'
 
         if params['instrument'] == 'NIRPS_HE':
             params['key_mjd'] = 'MJD-OBS'
@@ -324,7 +324,7 @@ def get_params(yaml_file=None):
             inst_short = 'spirou'
         elif 'NIRPS_HE' in params['instrument'].upper():
             params['INSTRUMENT'] = 'NIRPS_HE'
-            params['DATA_DIR'] = '/Users/eartigau/scratch/LBL-PCA/NIRPS_HE'
+            params['DATA_DIR'] = '/home/eartigau/scratch/LBL-PCA/NIRPS_HE'
             inst_folder = 'nirps_he'
             rsync_machine = 'nirps-client@maestria'
             inst_short = 'nirps'
@@ -347,10 +347,10 @@ def get_params(yaml_file=None):
 
 
     if params['whoami'] == 'eartigau':
-        params['path0'] = '/Users/eartigau/scratch/nirps_tempo/glitch_fp/'+params['instrument']
+        params['path0'] = '/home/eartigau/scratch/nirps_tempo/glitch_fp/'+params['instrument']
         if not os.path.exists(params['path0']):
             os.system('mkdir -p '+params['path0'])
-        params['output_slinky'] = os.path.join('/Users/eartigau/scratch/nirps_tempo/glitch_fp/', params['instrument'], 'data_'+params['instrument']+'_output/')
+        params['output_slinky'] = os.path.join('/home/eartigau/scratch/nirps_tempo/glitch_fp/', params['instrument'], 'data_'+params['instrument']+'_output/')
         if not os.path.exists(params['output_slinky']):
             os.system('mkdir -p '+params['output_slinky'])
 
