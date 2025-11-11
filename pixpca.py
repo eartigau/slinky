@@ -193,6 +193,7 @@ def get_params(yaml_file=None):
             #params['search_t_slinky_path'] = '/Volumes/courlan/SLINKY/data_SPIROU_output/*_slinky/*t_slinky.fits'
             params['pix_scale'] = 2.2  # km/s/pixel
             params['pca_mef_dir'] = '/Volumes/courlan/decorr/pca_mef/'
+
             #params['yaml_folder'] = '/home/eartigau/pycodes/pixeldecorr/yamls/'
 
         if params['instrument'] == 'NIRPS_HE':
@@ -202,7 +203,10 @@ def get_params(yaml_file=None):
             params['residual_path'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/'
             #params['search_t_slinky_path'] = '/Volumes/courlan/lbl_NIRPS_HE/science/*/*t.fits'
             params['pix_scale'] = 0.95  # km/s/pixel
+            params['patched_wavesol'] = '/home/eartigau/scratch/SLINKY/calib_NIRPS_HE_updatedwavesol/'
             params['pca_mef_dir'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/pca_mef/'
+            params['fibresetup'] = 'A'
+            params['sample_order'] = 65
 
     if getpass.getuser() == 'spirou':
         if params['instrument'] == 'SPIRou':
