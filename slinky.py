@@ -303,7 +303,7 @@ def refine_wavesol(params):
         cmd = f'rsync -avz spirou@maestria:/cosmos99/{inst_short}/apero-data/{maestria_path}/calib/*pp_e2dsff_{fiber}_wave_night_{fiber}.fits {calib_dir}'
         os.system(cmd)
 
-        plot_folder = '/Users/eartigau/glitch_fp/plots/'
+        plot_folder = '/home/eartigau/scratch/SLINKY/glitch_fp/plots/'
 
     elif params['whoami'] == 'spirou':
         # Sync files from the server to the local calibration directory
