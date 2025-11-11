@@ -293,14 +293,13 @@ def refine_wavesol(params):
         raise ValueError(f'Instrument {params["instrument"]} not recognized')
 
     if params['whoami'] == 'eartigau':
-
         # Sync files from the server to the local calibration directory
-        cmd = f'rsync -avz spirou@maestria:/cosmos99/{inst_short}/apero-data/{maestria_path}/red/*/*lines_{fiber}.fits' \
+        cmd = f'rsync -avz /home/eartigau/scratch/nirps_tempo/calib/*lines_{fiber}.fits' \
                 f' {calib_dir}'
         os.system(cmd)
-        cmd = f'rsync -avz spirou@maestria:/cosmos99/{inst_short}/apero-data/{maestria_path}/calib/*_wavesol_ref_{fiber}.fits {calib_dir}'
+        cmd = f'rsync -avz /home/eartigau/scratch/nirps_tempo/calib/*_wavesol_ref_{fiber}.fits {calib_dir}'
         os.system(cmd)
-        cmd = f'rsync -avz spirou@maestria:/cosmos99/{inst_short}/apero-data/{maestria_path}/calib/*pp_e2dsff_{fiber}_wave_night_{fiber}.fits {calib_dir}'
+        cmd = f'rsync -avz /home/eartigau/scratch/nirps_tempo/calib/*pp_e2dsff_{fiber}_wave_night_{fiber}.fits {calib_dir}'
         os.system(cmd)
 
         plot_folder = '/home/eartigau/scratch/SLINKY/glitch_fp/plots/'
