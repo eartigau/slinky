@@ -1,0 +1,9 @@
+# Ignore images in any subdirectory
+*/*.png
+*/*.jpg
+*/*.jpeg
+*/*.gif
+*/*.svg
+
+# ignore the plots directory
+plots/
