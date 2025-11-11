@@ -205,6 +205,7 @@ def get_params(yaml_file=None):
             params['pix_scale'] = 0.95  # km/s/pixel
             params['patched_wavesol'] = '/home/eartigau/scratch/SLINKY/calib_NIRPS_HE_updatedwavesol/'
             params['pca_mef_dir'] = '/home/eartigau/scratch/LBL-PCA/residuals_nirps/pca_mef/'
+            params['calib_dir'] = '/home/eartigau/scratch/SLINKY/calib_NIRPS_HE/'
             params['fibresetup'] = 'A'
             params['sample_order'] = 65
 
