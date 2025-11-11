@@ -860,7 +860,11 @@ def create_symlinks(params):
         printc(cmd, 'info')
         os.system(cmd)
 
-    waveref_files = glob.glob(f'/cosmos99/{inst_short}/apero-data/{inst}_{onoff_line}/calib/*_pp_e2dsff_A_wavesol_ref_*.fits')
+    if getpass.getuser() == 'eartigau':
+        waveref_files = glob.glob(f'/home/eartigau/scratch/nirps_tempo/calib/*wavesol_ref*A.fits')
+    else:
+        waveref_files = glob.glob(f'/cosmos99/{inst_short}/apero-data/{inst}_{onoff_line}/calib/*_pp_e2dsff_A_wavesol_ref_*.fits')
+
     waveref_file_name = params['waveref_file_name']
     for i in range(len(waveref_files)):
         waveref_file = waveref_files[i]
