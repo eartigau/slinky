@@ -10,3 +10,5 @@ plots/
 
 # python file
 python
+
+__pycache__/*
