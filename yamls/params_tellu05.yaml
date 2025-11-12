@@ -13,7 +13,19 @@ npca-max: 5
 
 # List of stars to be processed
 object_of_interest:
-  - 'PROXIMA'
-  - 'GL406'
+  - 'EPSILONERI'
   - 'GJ1'
-  - 'GJ3090'
+  - 'GJ3618'
+  - 'GJ3622'
+  - 'GJ3737'
+  - 'GJ581'
+  - 'GJ643'
+  - 'GJ682'
+  - 'GJ707'
+  - 'GJ784'
+  - 'GL406'
+  - 'GL699'
+  - 'PROXIMA'
+  - 'TOI1078'
+  - 'TZ_ARI'
+  - 'YZ_CMI'

@@ -20,6 +20,9 @@ import glob
 #yaml = 'yamls/params_tellu05.yaml'
 from time import sleep
 import datetime
+from pixtools import doppler, lowpassfilter, sigma, save_pickle, \
+    read_pickle, printc, snail, dict2mef, mef2dict, load_yaml, read_t, write_t
+
 
 def mkdir_p(dir_path):
     """Create a directory if it does not exist and if
@@ -45,39 +48,39 @@ def wrapper_slinky(params):
     datadir0 = str(params['output_slinky'])
 
     if not os.path.exists(datadir0):
-        print(f"Data directory {datadir0} does not exist. Please check the path.")
+        printc(f"Data directory {datadir0} does not exist. Please check the path.", 'red')
         mkdir_p(datadir0)
-        print(f"Created directory {datadir0}. Please add data files and rerun the script.")
+        printc(f"Created directory {datadir0}. Please add data files and rerun the script.", 'green')
 
     rparams['DATA_DIR'] = os.path.join(params['DATA_DIR'],params['now_str'])
     rparams['INSTRUMENT'] = params['instrument']
     
     if not os.path.exists(rparams['DATA_DIR']):
-        print('Creating main data directory '+rparams['DATA_DIR'])
+        printc(f'Creating main data directory {rparams["DATA_DIR"]}', 'green')
         mkdir_p(rparams['DATA_DIR'])
 
     for path in ['science'] :
         datadir = os.path.join(rparams['DATA_DIR'], path)
         if not os.path.exists(datadir):
-            print('Creating '+datadir)
+            printc(f'Creating {datadir}', 'green')
             mkdir_p(datadir)
         else:
-            print('Directory '+datadir+' already exists')
+            printc(f'Directory {datadir} already exists', 'yellow')
         paths = glob.glob(os.path.join(datadir0, '*'))
         for p in paths:
             if not os.path.exists(os.path.join(datadir, os.path.basename(p))):
-                print('Linking '+p+' to '+datadir)
+                printc(f'Linking {p} to {datadir}', 'green')
                 cmd = 'ln -s '+p+' '+datadir
                 os.system(cmd)
                 print(cmd)
             else:
-                print('File '+os.path.basename(p)+' already exists in '+datadir)
+                printc(f'File {os.path.basename(p)} already exists in {datadir}', 'yellow')
     
     if not os.path.exists(os.path.join(rparams['DATA_DIR'], 'templates')):
-        print('Creating templates directory')
+        printc(f'Creating templates directory {rparams["DATA_DIR"]}/templates', 'green')
         mkdir_p(os.path.join(rparams['DATA_DIR'], 'templates'))
     if not os.path.exists(os.path.join(rparams['DATA_DIR'], 'calib')):
-        print('Creating calib directory')
+        printc(f'Creating calib directory {rparams["DATA_DIR"]}/calib', 'green')
         mkdir_p(os.path.join(rparams['DATA_DIR'], 'calib'))
 
     rparams['DATA_SOURCE'] = 'CADC'
@@ -95,20 +98,20 @@ def wrapper_slinky(params):
                 if obj_new not in objs_to_do:
                     objs_to_do.append(obj_new)
 
-    print(os.path.join(rparams['DATA_DIR'],'science'))
-    print(objects_science)
+    printc(os.path.join(rparams['DATA_DIR'],'science'))
+    printc(objects_science)
 
 
     for ite in range(2):
         inst = ['SPIROU','NIRPS_HE'][ite]
-        print(f'we clean {inst} files')
+        printc(f'we clean {inst} files', 'green')
         f = glob.glob(f'/space/spirou/LBL-PCA/{inst}/science/*/*fits')
         for ff in f:
             try:
                 _ = os.stat(ff)
             except:
                 os.system('rm '+ff)
-                print('err : '+ff)
+                printc(f'err : {ff}', 'red')
 
     # The input file string (including wildcards) - if not set will use all
     #   files in the science directory (for this object name)
@@ -202,7 +205,7 @@ if __name__ == "__main__":
         params = get_params(yaml_file)
         wrapper_slinky(params)
     else:
-        print('You must pass a yaml file name')
+        printc('You must pass a yaml file name', 'red')
 
 
 # =============================================================================

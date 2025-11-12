@@ -319,6 +319,9 @@ def printc(message, msg_type='', print_time=True):
     if msg_type == 'number':
         msg_color = 'blue'
 
+    if msg_type in ['red', 'green', 'yellow']:
+        msg_color = msg_type
+
     if print_time:
         time = datetime.now().strftime('%H:%M:%S.%f')[:-4] + '│'
     else:

@@ -10,6 +10,8 @@ from astropy.table import Table
 from scipy.constants import c
 from scipy.interpolate import InterpolatedUnivariateSpline as ius
 from tqdm import tqdm
+from pixtools import doppler, lowpassfilter, sigma, save_pickle, \
+    read_pickle, printc, snail, dict2mef, mef2dict, load_yaml, read_t, write_t
 
 from etienne_tools import mjd_to_matplotlib_date, odd_ratio_mean
 
@@ -175,7 +177,7 @@ def padding_wavesol(params):
             os.stat(file)
             keep[i] = True
         except:
-            print(f'File {file} not found')
+            printc(f'File {file} not found', 'red')
             continue
     all_files = all_files[keep]
 
@@ -188,7 +190,7 @@ def padding_wavesol(params):
     # Process each input file
     for ifile, file in enumerate(all_files):
         # Check if the file is a valid FITS file
-        print(f'Processing file {ifile + 1}/{len(all_files)}')
+        printc(f'Processing file {ifile + 1}/{len(all_files)}', 'green')
 
         try:
             outdir = params['output_slinky'] + file.split('/')[-2] + '/'
@@ -197,17 +199,17 @@ def padding_wavesol(params):
             if not os.path.isdir(outdir):
                 cmd = 'mkdir ' + outdir
                 os.system(cmd)
-                print('\tWe create the output directory: ' + outdir)
+                printc(f'We create the output directory: {outdir}', 'green')
 
             if not os.path.isdir(outdir_slinky):
                 cmd = 'mkdir ' + outdir_slinky
                 os.system(cmd)
-                print('\tWe create the output directory: ' + outdir_slinky)
+                printc(f'We create the output directory: {outdir_slinky}', 'green')
 
             outname = outdir + file.split('/')[-1]
             outname_slinky = outdir_slinky + file.split('/')[-1].replace('.fits', '_slinky.fits')
 
-            print('\t\tProcessing file: ' + file)
+            printc(f'Processing file: {file}', 'green')
 
             # Read the header of the input file to get the wave solution file name
             hdr = fits.getheader(file, ext=1)
@@ -216,12 +218,12 @@ def padding_wavesol(params):
             # Check if the wave solution file exists
             keep = np.array([wavefile in w for w in all_wave_sol_files])
             if True not in keep:
-                print('\t\tNo wave solution found for file: ' + file)
+                printc(f'No wave solution found for file: {file}', 'red')
                 continue
 
             if os.path.exists(outdir+file.split('/')[-1]):
                 # we remove the file if it exists
-                print('\t\tRemoving file: ' + outdir+file.split('/')[-1])
+                printc(f'Removing file: {outdir+file.split('/')[-1]}', 'red')
                 os.remove(outdir+file.split('/')[-1])
 
             # Copy the input ffile to the output directory
@@ -229,7 +231,7 @@ def padding_wavesol(params):
 
             if os.path.exists(outname_slinky):
                 # we remove the file if it exists
-                print('\t\tRemoving file: ' + outname_slinky)
+                printc(f'Removing file: {outname_slinky}', 'red')
                 os.remove(outname_slinky)
 
             # Get the wave solution data
@@ -239,14 +241,14 @@ def padding_wavesol(params):
             # copy outname to outname_slinky
             copyfile(outname, outname_slinky)
 
-            print('\t Updated file with wave solution: ' + outname_slinky)
+            printc(f'Updated file with wave solution: {outname_slinky}', 'green')
             # Update the WaveA extension in the output file with the wave solution data
             hdu = fits.open(outname_slinky, mode='update')
             hdu[f'Wave{fiber}'].data = wavesol
             hdu.close()
 
         except Exception as e:
-            print('\t\tError processing file: ' + file + f' - {e}')
+            printc(f'Error processing file: {file} - {e}', 'red')
             continue
 
 def refine_wavesol(params):
@@ -261,11 +263,11 @@ def refine_wavesol(params):
     patched_dir = params["patched_wavesol"]
 
     if not os.path.isdir(calib_dir):
-        print(f'We create the output directory: {calib_dir}')
+        printc(f'We create the output directory: {calib_dir}', 'green')
         os.mkdir(calib_dir)
 
     if not os.path.isdir(patched_dir):
-        print(f'We create the output directory: {patched_dir}')
+        printc(f'We create the output directory: {patched_dir}', 'green')
         os.mkdir(patched_dir)
 
     if params["instrument"].upper() == 'SPIROU':
@@ -318,7 +320,7 @@ def refine_wavesol(params):
         
     # make plot_folder if it does not exist
     if not os.path.isdir(plot_folder):
-        print('We create the output directory:', plot_folder)
+        printc(f'We create the output directory: {plot_folder}', 'green')
         os.mkdir(plot_folder)
 
     # find which file is the ref file
@@ -345,10 +347,10 @@ def refine_wavesol(params):
 
         file_hc_updated = files_hc[i_hc].replace('.fits', '_slinky.fits')
         if os.path.isfile(file_hc_updated):
-            print(f'File {file_hc_updated} already processed, skipping')
+            printc(f'File {file_hc_updated} already processed, skipping', 'yellow')
             continue
 
-        print('Processing file {}/{}'.format(i_hc + 1, len(files_hc)))
+        printc(f'Processing file {i_hc + 1}/{len(files_hc)}', 'green')
         hdr = fits.getheader(files_hc[i_hc])
         tbl_hc = Table.read(files_hc[i_hc], 'WAVE_HCLIST')
 
@@ -358,7 +360,7 @@ def refine_wavesol(params):
         for iline in tqdm(range(len(tbl_hc_tmp)), leave = False):
             g = (tbl_hc_tmp['ORDER'][iline] == tbl_hc['ORDER'])*(tbl_hc_tmp['WAVE_REF'][iline] == tbl_hc['WAVE_REF'])
             if np.sum(g) == 0:
-                print(iline)
+                printc(iline, 'yellow')
                 continue
             g = np.where(g)[0][0]
             
@@ -367,18 +369,18 @@ def refine_wavesol(params):
         tbl_hc = Table(tbl_hc[ii])
 
         if 'CAVITY' in tbl_hc.colnames:
-            print('Cavity already computed, skipping')
+            printc(f'Cavity already computed, skipping', 'yellow')
             continue
         else:
-            print('Computing cavity for', files_hc[i_hc])
+            printc(f'Computing cavity for {files_hc[i_hc]}', 'green')
 
         # Find the corresponding FP file
         i_fp = np.argmin(np.abs(mjds_fp - mjds_hc[i_hc]))
         delta_t = mjds_fp[i_fp] - mjds_hc[i_hc]
 
-        print('Delta t =', delta_t)
+        printc(f'Delta t = {delta_t}', 'green')
         if np.abs(delta_t) > 0.5:
-            print('No corresponding FP file found, skipping')
+            printc(f'No corresponding FP file found, skipping', 'red')
             continue
 
         tbl_fp = Table.read(files_fp[i_fp], 'WAVE_FPLIST')
@@ -533,7 +535,7 @@ def refine_wavesol(params):
 
         # Print the fit results for the current file
         args = (ifile + 1, len(files_hc), fit[1], sig_fit[1], fit[0], sig_fit[0])
-        print('\t{}/{} zp {:5.2f}+-{:5.2f} [m/s], slope {:5.2f}+-{:5.2f} [m/s/µm]'.format(*args))
+        printc(f'\t{args[0]}/{args[1]} zp {args[2]:5.2f}+-{args[3]:5.2f} [m/s], slope {args[4]:5.2f}+-{args[5]:5.2f} [m/s/µm]', 'green')
 
         if doplot:
             # Plot the zero-point and slope with error bars
@@ -561,7 +563,7 @@ def refine_wavesol(params):
         plt.close()
 
     # Print the standard deviation of the differences between consecutive pedestals
-    print(sigma(all_pedestals - np.roll(all_pedestals, 1)) / np.sqrt(2))
+    printc(f'Standard deviation of differences between consecutive pedestals: {sigma(all_pedestals - np.roll(all_pedestals, 1)) / np.sqrt(2)}', 'green')
 
     recovered_pedestal = np.zeros_like(all_pedestals)
     recovered_slope = np.zeros_like(all_slopes)
@@ -570,16 +572,16 @@ def refine_wavesol(params):
 
     # Loop through each FP file
     for i_fp in range(len(files_fp)):
-        print('\n')
+        printc('\n', 'green')
         # get widht of the terminal window
         n_pix_terminal = os.get_terminal_size().columns
 
-        print('*' * n_pix_terminal)
-        print('\n')
-        print('Processing file {}/{}'.format(i_fp + 1, len(files_fp)))
-        print('\n')
+        printc('*' * n_pix_terminal, 'green')
+        printc('\n', 'green')
+        printc(f'Processing file {i_fp + 1}/{len(files_fp)}', 'green')
+        printc('\n', 'green')
 
-        print('Processing wavelength solution of night {}/{}'.format(i_fp + 1, len(files_fp)))
+        printc(f'Processing wavelength solution of night {i_fp + 1}/{len(files_fp)}', 'green')
         file_fp = files_fp[i_fp]
         hdr = fits.getheader(file_fp)
         wavefile = f'{calib_dir}' + hdr['WAVEFILE']
@@ -599,7 +601,7 @@ def refine_wavesol(params):
         err_pedestal_hc = all_errpedestals[i_hc]
 
         if os.path.isfile(patched_wavefile):
-            print('File already processed, skipping')
+            printc(f'File already processed, skipping', 'yellow')
             continue
 
 
@@ -712,7 +714,7 @@ def refine_wavesol(params):
         wave_hc_plot = np.concatenate(wave_hc)
         wave_fp_plot = np.concatenate(wave_fp)
 
-        print('RMS {:.2f} m/s of FP peaks'.format(sigma(dv_fp_plot)))
+        printc(f'RMS {sigma(dv_fp_plot):.2f} m/s of FP peaks', 'green')
 
 
         sig_per_line_ms_plot = np.array(sig_per_line_ms)
@@ -749,12 +751,12 @@ def refine_wavesol(params):
         err_hcs = err_hcs[valid]
         mean_waves = mean_waves[valid]
 
-        print(f'Fitting polynomial to {len(mean_waves)} points')
+        printc(f'Fitting polynomial to {len(mean_waves)} points', 'green')
         fit,cov = np.polyfit((mean_waves-wave_leverage)/1000, mean_hcs, 1, w=1/err_hcs, cov=True)
         sig = np.sqrt(np.diag(cov))
 
-        print('Slope: {:5.2f}+-{:5.2f} [m/s/µm]'.format(fit[0], sig[0]))
-        print('Pedestal: {:5.2f}+-{:5.2f} [m/s]'.format(fit[1], sig[1]))
+        printc(f'Slope: {fit[0]:5.2f}+-{sig[0]:5.2f} [m/s/µm]', 'green')
+        printc(f'Pedestal: {fit[1]:5.2f}+-{sig[1]:5.2f} [m/s]', 'green')
 
         all_slopes[i_fp] += fit[0]
         all_pedestals[i_fp] += fit[1]
@@ -789,21 +791,21 @@ def refine_wavesol(params):
         recovered_errpedestal[i_fp] = sig[1]
 
 
-        print('Input pedestal: {:5.2f}+-{:5.2f} [m/s]'.format(pedestal_hc, err_pedestal_hc))
-        print('Input slope: {:5.2f}+-{:5.2f} [m/s/µm]'.format(slope_hc, err_slope_hc))
-        print('{} -> zp {:5.2f}+-{:5.2f} [m/s], slope {:5.2f}+-{:5.2f} [m/s/µm]'.format(i_fp, fit[1], sig[1], fit[0], sig[0]))
+        printc(f'Input pedestal: {pedestal_hc:5.2f}+-{err_pedestal_hc:5.2f} [m/s]', 'green')
+        printc(f'Input slope: {slope_hc:5.2f}+-{err_slope_hc:5.2f} [m/s/µm]', 'green')
+        printc(f'{i_fp} -> zp {fit[1]:5.2f}+-{sig[1]:5.2f} [m/s], slope {fit[0]:5.2f}+-{sig[0]:5.2f} [m/s/µm]', 'green')
 
 
-        print(f'RMS HC: {sigma(dv_hc):.2f} m/s')
-        print(f'RMS FP: {sigma(dv_fp):.2f} m/s')
+        printc(f'RMS HC: {sigma(dv_hc):.2f} m/s', 'green')
+        printc(f'RMS FP: {sigma(dv_fp):.2f} m/s', 'green')
 
 
-        print(f'Patching {wavefile} and outputting to {patched_wavefile}')
+        printc(f'Patching {wavefile} and outputting to {patched_wavefile}', 'green')
         # Update the header of the patched wavefile
         # Update the wavefile with the corrected wavelength map
         copyfile(wavefile, patched_wavefile)
         with fits.open(patched_wavefile) as hdul:
-            print('Updating file', wavefile) 
+            printc(f'Updating file {wavefile}', 'green')
             hdul[1].data = wavemap
             hdul[0].header['SLINKY'] = True, 'Wavelength solution corrected for cavity effect'
             hdul[0].header['ZPCAV'] = pedestal_hc, 'Zero-point [m/s]'
@@ -812,9 +814,9 @@ def refine_wavesol(params):
             hdul[0].header['SLPCAVER'] = err_slope_hc, 'Error on slope [m/s/um]'
             hdul.writeto(patched_wavefile, overwrite=True)
 
-    print('RMS : {:.3f} m/s pedestal'.format(np.std(recovered_pedestal)))
-    print('RMS : {:.3f} m/s/µm slope'.format(np.std(recovered_slope)))
-    
+    printc(f'RMS : {np.std(recovered_pedestal):.3f} m/s pedestal', 'green')
+    printc(f'RMS : {np.std(recovered_slope):.3f} m/s/µm slope', 'green')
+
     fig, ax = plt.subplots(nrows=2, ncols=1, sharex=True)
     ax[0].errorbar(mjds_hc, recovered_pedestal, yerr=recovered_errpedestal, fmt='g.')
     ax[1].errorbar(mjds_hc, recovered_slope, yerr=recovered_errslope, fmt='g.')
