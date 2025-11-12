@@ -222,6 +222,8 @@ def padding_wavesol(params):
                 continue
 
             if os.path.exists(outdir+file.split('/')[-1]):
+                print(outdir)
+                print(file)
                 # we remove the file if it exists
                 printc(f'Removing file: {outdir+file.split('/')[-1]}', 'red')
                 os.remove(outdir+file.split('/')[-1])
