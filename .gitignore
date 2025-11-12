@@ -7,3 +7,6 @@
 
 # ignore the plots directory
 plots/
+
+# python file
+python

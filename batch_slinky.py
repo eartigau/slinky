@@ -10,7 +10,13 @@ This interactive script orchestrates three processing stages for NIRPS/NIRPS-HE 
 
 Usage
 -----
+Interactive mode:
     python batch_slinky.py <yaml_file>
+
+Non-interactive mode with command-line arguments:
+    python batch_slinky.py <yaml_file> --do_reset=True/False --do_slinky=True/False --do_pixpca=True/False --do_lbl_slinky=True/False
+
+All four flags must be specified for non-interactive mode. Use True or False (case-insensitive).
 
 Required YAML parameters
 ------------------------
@@ -39,14 +45,14 @@ Workflow
    - For hot stars found in the reduced files, verify their template files exist.
 
 2) Confirmation and options:
-   - Ask the user to proceed with batch processing.
+   - Ask the user to proceed with batch processing (interactive mode only).
    - Optional reset (non-destructive to raw data):
      * Deletes all immediate files under: patched_wavesol, pca_mef_dir, residual_path
        (directories are preserved; deletion is non-recursive).
      * Removes any FITS files inside directories matching "*slinky*" under
        output_slinky/<object>.
      * Errors while deleting individual files are reported and ignored.
-   - Ask which stages to run: slinky, pix_pca, lbl_slinky.
+   - Ask which stages to run: slinky, pix_pca, lbl_slinky (interactive mode only).
 
 3) Execution:
    - Conditionally call:
@@ -101,6 +107,33 @@ def ask_user(prompt, max_attempts=5):
             print("Too many invalid attempts. Aborting script.")
             sys.exit(1)
 
+def parse_bool_arg(arg_string):
+    """
+    Parse a command-line argument in the form --key=value into key and boolean value.
+    
+    Parameters
+    ----------
+    arg_string : str
+        Command-line argument string (e.g., '--do_reset=True')
+    
+    Returns
+    -------
+    tuple
+        (key, bool_value) or (None, None) if parsing fails
+    """
+    if not arg_string.startswith('--'):
+        return None, None
+    
+    try:
+        key, value = arg_string[2:].split('=')
+        value_lower = value.lower()
+        if value_lower not in ('true', 'false'):
+            print(f"Error: Invalid value '{value}' for {key}. Must be 'True' or 'False'.")
+            return None, None
+        return key, value_lower == 'true'
+    except ValueError:
+        return None, None
+
 def main():
     """
     Main function for NIRPS batch processing.
@@ -109,13 +142,58 @@ def main():
     # -------------------------------------------------------------------------
     # Check command-line arguments
     # -------------------------------------------------------------------------
-    if len(sys.argv) != 2:
-        print("Usage: python batch_nirps.py <yaml_file>")
+    if len(sys.argv) < 2:
+        print("Usage:")
+        print("  Interactive mode: python batch_slinky.py <yaml_file>")
+        print("  Non-interactive mode: python batch_slinky.py <yaml_file> --do_reset=True/False --do_slinky=True/False --do_pixpca=True/False --do_lbl_slinky=True/False")
         sys.exit(1)
+    
     yaml_file = sys.argv[1]
+    
+    # -------------------------------------------------------------------------
+    # Parse command-line arguments for non-interactive mode
+    # -------------------------------------------------------------------------
+    interactive_mode = len(sys.argv) == 2
+    do_reset = False
+    do_slinky = False
+    do_pixpca = False
+    do_lbl_slinky = False
+    
+    if not interactive_mode:
+        if len(sys.argv) != 6:
+            print("Error: For non-interactive mode, you must provide all four flags:")
+            print("  --do_reset=True/False --do_slinky=True/False --do_pixpca=True/False --do_lbl_slinky=True/False")
+            sys.exit(1)
+        
+        args_dict = {}
+        for arg in sys.argv[2:]:
+            key, value = parse_bool_arg(arg)
+            if key is None:
+                print(f"Error: Invalid argument format: {arg}")
+                print("Expected format: --key=True or --key=False")
+                sys.exit(1)
+            args_dict[key] = value
+        
+        # Check that all required arguments are present
+        required_args = ['do_reset', 'do_slinky', 'do_pixpca', 'do_lbl_slinky']
+        for req_arg in required_args:
+            if req_arg not in args_dict:
+                print(f"Error: Missing required argument --{req_arg}=True/False")
+                sys.exit(1)
+        
+        do_reset = args_dict['do_reset']
+        do_slinky = args_dict['do_slinky']
+        do_pixpca = args_dict['do_pixpca']
+        do_lbl_slinky = args_dict['do_lbl_slinky']
+        
+        print(f"Running in non-interactive mode:")
+        print(f"  Reset: {do_reset}")
+        print(f"  Slinky: {do_slinky}")
+        print(f"  Pixel PCA: {do_pixpca}")
+        print(f"  LBL Slinky: {do_lbl_slinky}")
 
     # -------------------------------------------------------------------------
-    # Define options and explanations for user prompts
+    # Define options and explanations for user prompts (interactive mode only)
     # -------------------------------------------------------------------------
     options = {
         'reset': {
@@ -153,14 +231,6 @@ def main():
 """
         }
     }
-
-    # -------------------------------------------------------------------------
-    # Initialize flags for each processing step
-    # -------------------------------------------------------------------------
-    do_reset = False
-    do_slinky = False
-    do_pixpca = False
-    do_lbl_slinky = False
 
     # -------------------------------------------------------------------------
     # Welcome message and terminal width
@@ -239,11 +309,12 @@ def main():
             print(f"\t❌\tError: Template file for {hot_stars} does not exist: {template_file}")
 
     # -------------------------------------------------------------------------
-    # Ask user if they want to proceed with batch processing
+    # Ask user if they want to proceed with batch processing (interactive only)
     # -------------------------------------------------------------------------
-    if not ask_user("Do you want to run the batch processing?"):
-        print("Exiting as requested.")
-        exit_flag = True
+    if interactive_mode:
+        if not ask_user("Do you want to run the batch processing?"):
+            print("Exiting as requested.")
+            exit_flag = True
 
     if exit_flag:
         print("Exiting due to errors or user request.")
@@ -251,19 +322,28 @@ def main():
     print("=" * width_terminal)
 
     # -------------------------------------------------------------------------
-    # Ask user which steps to run
+    # Ask user which steps to run (interactive mode only)
     # -------------------------------------------------------------------------
+    if interactive_mode:
+        # Offer an optional full reset of processed outputs before running steps
+        if ask_user(options['reset']['explanation']):
+            do_reset = True
+        
+        # Then prompt which processing steps to run
+        if ask_user(options['run_slinky']['explanation']):
+            do_slinky = True
+        if ask_user(options['run_pix_pca']['explanation']):
+            do_pixpca = True
+        if ask_user(options['run_lbl_slinky']['explanation']):
+            do_lbl_slinky = True
+        print("=" * width_terminal)
 
-    # Offer an optional full reset of processed outputs before running steps
-    # - Paths included: patched wavelength solutions, PCA MEF directory, and residuals
-    # - Behavior: delete all files directly under these directories (non-recursive);
-    #             directories themselves are preserved
-    # - Safety: failures to delete a given file are caught and reported but do not abort
-    if ask_user(options['reset']['explanation']):
+    # -------------------------------------------------------------------------
+    # Perform reset if requested
+    # -------------------------------------------------------------------------
+    if do_reset:
         # Build the list of output directories to clean
         paths = params['patched_wavesol'], params['pca_mef_dir'], params['residual_path'],params['calib_dir']+'/*slinky*'
-
-        #/space/spirou/SLINKY/calib_NIRPS_HE/
 
         for path in paths:
             # Skip cleaning for paths that do not exist
@@ -281,8 +361,6 @@ def main():
                 print(f"Path {path} does not exist. No files to delete.")
 
         # Additionally, remove slinky products per object of interest
-        # Pattern matches both "_slinky" and "_slinky_<batchname>" directories
-        # and removes any FITS files within them.
         for star in params['object_of_interest']:
             slinky_files = glob.glob(os.path.join(params['output_slinky'], star + '*slinky*', '*.fits'))
             for file in slinky_files:
@@ -292,15 +370,6 @@ def main():
                 except Exception as e:
                     # Continue on errors, just report them
                     print(f"Error deleting file {file}: {e}")
-
-    # Then prompt which processing steps to run
-    if ask_user(options['run_slinky']['explanation']):
-        do_slinky = True
-    if ask_user(options['run_pix_pca']['explanation']):
-        do_pixpca = True
-    if ask_user(options['run_lbl_slinky']['explanation']):
-        do_lbl_slinky = True
-    print("=" * width_terminal)
 
     # -------------------------------------------------------------------------
     # Run selected processing steps
