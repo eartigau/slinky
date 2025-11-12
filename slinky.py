@@ -225,7 +225,7 @@ def padding_wavesol(params):
                 print(outdir)
                 print(file)
                 # we remove the file if it exists
-                printc(f'Removing file: {outdir+file.split('/')[-1]}', 'red')
+                printc(f"Removing file: {outdir+file.split('/')[-1]}", 'red')
                 os.remove(outdir+file.split('/')[-1])
 
             # Copy the input ffile to the output directory
