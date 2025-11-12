@@ -21,6 +21,17 @@ import glob
 from time import sleep
 import datetime
 
+def mkdir_p(dir_path):
+    """Create a directory if it does not exist and if
+    the parent directories do not exist, create them as well.
+    Parameters
+    ----------
+    dir_path : str
+        The path to the directory to create.
+    """
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
 # =============================================================================
 # Start of code
 # =============================================================================
@@ -32,20 +43,24 @@ def wrapper_slinky(params):
 
 
     datadir0 = str(params['output_slinky'])
+
     if not os.path.exists(datadir0):
         print(f"Data directory {datadir0} does not exist. Please check the path.")
-        sys.exit(1)
+        mkdir_p(datadir0)
+        print(f"Created directory {datadir0}. Please add data files and rerun the script.")
+
     rparams['DATA_DIR'] = os.path.join(params['DATA_DIR'],params['now_str'])
     rparams['INSTRUMENT'] = params['instrument']
     
     if not os.path.exists(rparams['DATA_DIR']):
-        os.system('mkdir '+rparams['DATA_DIR'])
+        print('Creating main data directory '+rparams['DATA_DIR'])
+        mkdir_p(rparams['DATA_DIR'])
 
     for path in ['science'] :
         datadir = os.path.join(rparams['DATA_DIR'], path)
         if not os.path.exists(datadir):
             print('Creating '+datadir)
-            os.mkdir(datadir)
+            mkdir_p(datadir)
         else:
             print('Directory '+datadir+' already exists')
         paths = glob.glob(os.path.join(datadir0, '*'))
@@ -60,10 +75,10 @@ def wrapper_slinky(params):
     
     if not os.path.exists(os.path.join(rparams['DATA_DIR'], 'templates')):
         print('Creating templates directory')
-        os.mkdir(os.path.join(rparams['DATA_DIR'], 'templates'))
+        mkdir_p(os.path.join(rparams['DATA_DIR'], 'templates'))
     if not os.path.exists(os.path.join(rparams['DATA_DIR'], 'calib')):
         print('Creating calib directory')
-        os.mkdir(os.path.join(rparams['DATA_DIR'], 'calib'))
+        mkdir_p(os.path.join(rparams['DATA_DIR'], 'calib'))
 
     rparams['DATA_SOURCE'] = 'CADC'
 
