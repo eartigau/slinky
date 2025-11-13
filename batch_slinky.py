@@ -235,7 +235,10 @@ def main():
     # -------------------------------------------------------------------------
     # Welcome message and terminal width
     # -------------------------------------------------------------------------
-    width_terminal = os.get_terminal_size().columns
+    try:
+        width_terminal = os.get_terminal_size().columns
+    except OSError:
+        width_terminal = 80  # Default width if terminal size cannot be determined
     print("=" * width_terminal)
     print("Welcome to the NIRPS batch processing script!")
     print("This script will run the slinky, pixel PCA and LBL steps for NIRPS data.")
