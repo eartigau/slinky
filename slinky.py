@@ -576,7 +576,10 @@ def refine_wavesol(params):
     for i_fp in range(len(files_fp)):
         printc('\n', 'green')
         # get widht of the terminal window
-        n_pix_terminal = os.get_terminal_size().columns
+        try:
+            n_pix_terminal = os.get_terminal_size().columns
+        except OSError:
+            n_pix_terminal = 80  # Default width if terminal size cannot be determined
 
         printc('*' * n_pix_terminal, 'green')
         printc('\n', 'green')
