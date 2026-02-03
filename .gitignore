@@ -4,6 +4,7 @@
 */*.jpeg
 */*.gif
 */*.svg
+*/*.fits
 
 # ignore the plots directory
 plots/
