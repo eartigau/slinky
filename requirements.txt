@@ -1,0 +1,23 @@
+# Slinky requirements
+
+# Core scientific stack
+numpy
+scipy
+matplotlib
+astropy
+pyyaml
+
+# FITS file handling
+astropy
+
+# Optional: for interactive plots
+ipython
+
+# If you use database features
+sqlalchemy
+
+# If you use plotting scripts
+seaborn
+
+# For progress bars (optional)
+tqdm
